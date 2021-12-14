@@ -20,7 +20,7 @@ module "vpc" {
   source = "../../"
 
   name = local.name
-  cidr = "10.0.0.0/16" 
+  #cidr = "10.0.0.0/16" defined in variables
 
   azs                 = ["${local.region-}-${var.environment}az-a", "${local.region}-${var.environment}az-b", "${local.region}-${var.environment}az-c", "${local.region}-${var.environment}az-d"]
   private_subnets     = ["10.0.0.0/24", "10.0.1.0/24", "10.0.2.0/24","10.0.3.0/24",]
@@ -30,27 +30,20 @@ module "vpc" {
   redshift_subnets    = ["10.4.0.0/24", "10.4.1.0/24", "10.4.2.0/24", "10.4.3.0/24"]
   intra_subnets       = ["10.5.0.0/24", "10.5.1.0/24", "10.5.2.0/24", "10.5.3.0/24"]
 
-  create_database_subnet_group     = false
-  manage_default_route_table       = false
-  default_route_table_tags         = { DefaultRouteTable = true }
-  enable_dns_hostnames             = true
-  enable_dns_support               = true
-  enable_classiclink               = false
-  enable_classiclink_dns_support   = false
-  enable_nat_gateway               = true
-  single_nat_gateway               = false
-  enable_vpn_gateway               = true
-  enable_dhcp_options              = false
-  #dhcp_options_domain_name         = "service.consul"
-  #dhcp_options_domain_name_servers = ["127.0.0.1", "10.10.0.2"]
+  create_database_subnet_group = false
 
-  # Default security group - ingress/egress rules cleared to deny all
-  manage_default_security_group  = true
-  default_security_group_ingress = []
-  default_security_group_egress  = []
+  manage_default_route_table = true
+  default_route_table_tags   = { DefaultRouteTable = true }
 
+  enable_dns_hostnames = true
+  enable_dns_support   = true
 
-#not needed and should be connected at a transit gateway
+  enable_classiclink             = true
+  enable_classiclink_dns_support = true
+
+  enable_nat_gateway = true
+  single_nat_gateway = true
+
 /*   customer_gateways = {
     IP1 = {
       bgp_asn     = 65112
@@ -63,6 +56,25 @@ module "vpc" {
     }
   }
  */
+  enable_vpn_gateway = false
+
+  enable_dhcp_options              = false
+  dhcp_options_domain_name         = "service.consul"
+  dhcp_options_domain_name_servers = ["127.0.0.1", "10.10.0.2"]
+
+  # Default security group - ingress/egress rules cleared to deny all
+  manage_default_security_group  = true
+  default_security_group_ingress = []
+  default_security_group_egress  = []
+
+  # VPC Flow Logs (Cloudwatch log group and IAM role will be created)
+  enable_flow_log                      = true
+  create_flow_log_cloudwatch_log_group = true
+  create_flow_log_cloudwatch_iam_role  = true
+  flow_log_max_aggregation_interval    = 60
+
+  tags = local.tags
+  
   # VPC Flow Logs (Cloudwatch log group and IAM role will be created)
   enable_flow_log                      = true
   create_flow_log_cloudwatch_log_group = true
@@ -176,5 +188,55 @@ module "vpc_endpoints_nocreate" {
 data "aws_security_group" "default" {
   name   = "default"
   vpc_id = module.vpc.vpc_id
+}
+
+# Data source used to avoid race condition
+data "aws_vpc_endpoint_service" "dynamodb" {
+  service = "dynamodb"
+
+  filter {
+    name   = "service-type"
+    values = ["Gateway"]
+  }
+}
+
+data "aws_iam_policy_document" "dynamodb_endpoint_policy" {
+  statement {
+    effect    = "Deny"
+    actions   = ["dynamodb:*"]
+    resources = ["*"]
+
+    principals {
+      type        = "*"
+      identifiers = ["*"]
+    }
+
+    condition {
+      test     = "StringNotEquals"
+      variable = "aws:sourceVpce"
+
+      values = [data.aws_vpc_endpoint_service.dynamodb.id]
+    }
+  }
+}
+
+data "aws_iam_policy_document" "generic_endpoint_policy" {
+  statement {
+    effect    = "Deny"
+    actions   = ["*"]
+    resources = ["*"]
+
+    principals {
+      type        = "*"
+      identifiers = ["*"]
+    }
+
+    condition {
+      test     = "StringNotEquals"
+      variable = "aws:sourceVpce"
+
+      values = [data.aws_vpc_endpoint_service.dynamodb.id]
+    }
+  }
 }
 
