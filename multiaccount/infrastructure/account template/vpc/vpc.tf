@@ -4,7 +4,7 @@ provider "aws" {
 
 locals {
   name   = "complete-example"
-  region = "eu-west-1"
+  region = "eu-east-1"
   tags = {
     Owner       = "user"
     Environment = "staging"
@@ -20,49 +20,58 @@ module "vpc" {
   source = "../../"
 
   name = local.name
-  cidr = "10.0.0.0/16" # 10.0.0.0/8 is reserved for EC2-Classic
+  #cidr = "10.0.0.0/16" defined in variables
 
-  azs                 = ["${local.region}a", "${local.region}b", "${local.region}c"]
-  private_subnets     = ["10.0.1.0/24", "10.0.2.0/24", "10.0.3.0/24"]
-  public_subnets      = ["10.0.4.0/24", "10.0.5.0/24", "10.0.6.0/24"]
-  database_subnets    = ["10.0.7.0/24", "10.0.8.0/24", "10.0.9.0/24"]
+  azs                 = ["${local.region-}-${var.environment}az-a", "${local.region}-${var.environment}az-b", "${local.region}-${var.environment}az-c", "${local.region}-${var.environment}az-d"]
+  private_subnets     = ["10.0.0.0/24", "10.0.1.0/24", "10.0.2.0/24","10.0.3.0/24",]
+  public_subnets      = ["10.1.0.0/24", "10.1.1.0/24", "10.1.2.0/24", "10.1.3.0/24"]
+  database_subnets    = ["10.2.0.0/24", "10.2.1.0/24", "10.2.2.0/24", "10.2.3.0/24"]
+  elasticache_subnets = ["10.3.0.0/24", "10.3.1.0/24", "10.3.2.0/24", "10.3.3.0/24"]
+  redshift_subnets    = ["10.4.0.0/24", "10.4.1.0/24", "10.4.2.0/24", "10.4.3.0/24"]
+  intra_subnets       = ["10.5.0.0/24", "10.5.1.0/24", "10.5.2.0/24", "10.5.3.0/24"]
 
-  #Route table options for the vpc
+  create_database_subnet_group = false
+
   manage_default_route_table = true
   default_route_table_tags   = { DefaultRouteTable = true }
-  
-  #dns settings for the vpc
+
   enable_dns_hostnames = true
   enable_dns_support   = true
 
-  #create an internet gateway 
-  create_igw           = true
+  enable_classiclink             = true
+  enable_classiclink_dns_support = true
 
-  #create an internet gateway 
-  create_egress_only_igw  = false
-
-  #nat gateway settings - 1 nat gw per vpc
   enable_nat_gateway = true
-  single_nat_gateway = false
-  one_nat_gateway_per_az = true
+  single_nat_gateway = true
+
+/*   customer_gateways = {
+    IP1 = {
+      bgp_asn     = 65112
+      ip_address  = "1.2.3.4"
+      device_name = "some_name"
+    },
+    IP2 = {
+      bgp_asn    = 65112
+      ip_address = "5.6.7.8"
+    }
+  }
+ */
+  enable_vpn_gateway = false
+
+  #enable_dhcp_options              = false
+  #dhcp_options_domain_name         = "service.consul"
+  #dhcp_options_domain_name_servers = ["127.0.0.1", "10.10.0.2"]
 
   # Default security group - ingress/egress rules cleared to deny all
   manage_default_security_group  = true
   default_security_group_ingress = []
   default_security_group_egress  = []
-
+  
   # VPC Flow Logs (Cloudwatch log group and IAM role will be created)
   enable_flow_log                      = true
   create_flow_log_cloudwatch_log_group = true
   create_flow_log_cloudwatch_iam_role  = true
   flow_log_max_aggregation_interval    = 60
-
-  #database subnet specific
-  create_database_internet_gateway_route  = false
-  create_database_nat_gateway_route       = false
-  create_database_subnet_group            = false
-  create_database_subnet_route_table      = false
-
   tags = local.tags
 }
 
@@ -222,3 +231,4 @@ data "aws_iam_policy_document" "generic_endpoint_policy" {
     }
   }
 }
+
