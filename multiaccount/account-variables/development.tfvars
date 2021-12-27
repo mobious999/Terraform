@@ -18,8 +18,12 @@ ingress_cidr_blocks = ""
 ingress_cidr_blocks_generic = ""
 ingress_cidr_blocks_web = ""
 ingress_cidr_blocks_other = ""
-
 egress_cidr_blocks = "0.0.0.0/0"
+
+#used for the default bucket name for all of the state files
+statebucketname = "develpment_s3"
+
+#default tags that can be merged into any terraform file
 
 Development_tags = {
   "Environment" = "dev"
@@ -38,3 +42,4 @@ Development_linux_os_tags = {
   "Ssm" = "True"
   "Teamemail" "someuser@someco.com"
 }
+
