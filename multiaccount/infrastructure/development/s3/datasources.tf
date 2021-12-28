@@ -19,7 +19,7 @@ data "terraform_remote_state" "s3" {
  config {
   bucket  = "${var.environment}-terraform-state"
   profile = "${var.profile}"
-  key     = "${var.statebucketname}/tfstate"
+  key     = "${var.statebucketname}/s3.tfstate"
   region  = "${var.region}"
  }
 }
@@ -84,9 +84,45 @@ data "terraform_remote_state" "iam_users" {
  }
 }
 
+data "terraform_remote_state" "ecs" {
+ backend     = "s3"
+ config {
+  bucket  = "${var.environment}-terraform-state"
+  profile = "${var.profile}"
+  key     = "${var.statebucketname}/ecs.tfstate"
+  region  = "${var.region}"
+ }
+}
 
+data "terraform_remote_state" "eks" {
+ backend     = "s3"
+ config {
+  bucket  = "${var.environment}-terraform-state"
+  profile = "${var.profile}"
+  key     = "${var.statebucketname}/eks.tfstate"
+  region  = "${var.region}"
+ }
+}
 
+data "terraform_remote_state" "ecr" {
+ backend     = "s3"
+ config {
+  bucket  = "${var.environment}-terraform-state"
+  profile = "${var.profile}"
+  key     = "${var.statebucketname}/ecr.tfstate"
+  region  = "${var.region}"
+ }
+}
 
+data "terraform_remote_state" "batch" {
+ backend     = "s3"
+ config {
+  bucket  = "${var.environment}-terraform-state"
+  profile = "${var.profile}"
+  key     = "${var.statebucketname}/batch.tfstate"
+  region  = "${var.region}"
+ }
+}
 
 
 
