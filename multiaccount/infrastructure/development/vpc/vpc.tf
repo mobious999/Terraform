@@ -1,13 +1,9 @@
-provider "aws" {
-  region = "${var.region}"
-}
-
 locals {
-  name   = "complete-example"
-  region = "${var.region}"
+  name   = "Example"
+  region = var.region
   tags = {
-    Owner       = "${var.owner}"
-    Environment = "${var.environment}"
+    Owner       = var.owner
+    Environment = var.environment
   }
 }
 
@@ -17,13 +13,11 @@ locals {
 
 module "vpc" {
   source = "../../"
-
-  name = local.name
-  azs                 = ["${var.region}-${var.environment}az-a", "${var.region}-${var.environment}az-b", "${var.region}-${var.environment}az-c", "${var.region}-${var.environment}az-d"]
-  create_database_subnet_group = false
-  manage_default_route_table = true
-  default_route_table_tags   = { DefaultRouteTable = true }
-
+  #name = local.name
+  #azs                 = ["${local.region-}-${var.environment}az-a", "${local.region}-${var.environment}az-b", "${local.region}-${var.environment}az-c", "${local.region}-${var.environment}az-d"]
+  #create_database_subnet_group = false
+  #manage_default_route_table = true
+  #default_route_table_tags   = { DefaultRouteTable = true }
 }
 
 ################################################################################
@@ -120,7 +114,6 @@ module "vpc_endpoints" {
 
 module "vpc_endpoints_nocreate" {
   source = "../../modules/vpc-endpoints"
-
   create = false
 }
 
@@ -136,7 +129,6 @@ data "aws_security_group" "default" {
 # Data source used to avoid race condition
 data "aws_vpc_endpoint_service" "dynamodb" {
   service = "dynamodb"
-
   filter {
     name   = "service-type"
     values = ["Gateway"]
