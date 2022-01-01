@@ -16,7 +16,7 @@ account_map = {
   Accountname10 = "12345678910"
 }
 
-// Equivalent of global_tags in wellfleet-eis-terraform-platform repo
+// Equivalent of global_tags
 tags = {
   terraform   = "true"
   "wfl:Email" = "someemail@someco.com"

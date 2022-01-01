@@ -4,11 +4,10 @@ provider "aws" {
 
 locals {
   name   = "complete-example"
-  region = "eu-east-1"
+  region = "${var.region"
   tags = {
-    Owner       = "user"
-    Environment = "staging"
-    Name        = "complete"
+    Owner       = "${var.owner}"
+    Environment = "${var.environment}"
   }
 }
 
@@ -20,59 +19,11 @@ module "vpc" {
   source = "../../"
 
   name = local.name
-  #cidr = "10.0.0.0/16" defined in variables
-
   azs                 = ["${local.region-}-${var.environment}az-a", "${local.region}-${var.environment}az-b", "${local.region}-${var.environment}az-c", "${local.region}-${var.environment}az-d"]
-  private_subnets     = ["10.0.0.0/24", "10.0.1.0/24", "10.0.2.0/24","10.0.3.0/24",]
-  public_subnets      = ["10.1.0.0/24", "10.1.1.0/24", "10.1.2.0/24", "10.1.3.0/24"]
-  database_subnets    = ["10.2.0.0/24", "10.2.1.0/24", "10.2.2.0/24", "10.2.3.0/24"]
-  elasticache_subnets = ["10.3.0.0/24", "10.3.1.0/24", "10.3.2.0/24", "10.3.3.0/24"]
-  redshift_subnets    = ["10.4.0.0/24", "10.4.1.0/24", "10.4.2.0/24", "10.4.3.0/24"]
-  intra_subnets       = ["10.5.0.0/24", "10.5.1.0/24", "10.5.2.0/24", "10.5.3.0/24"]
-
   create_database_subnet_group = false
-
   manage_default_route_table = true
   default_route_table_tags   = { DefaultRouteTable = true }
 
-  enable_dns_hostnames = true
-  enable_dns_support   = true
-
-  enable_classiclink             = true
-  enable_classiclink_dns_support = true
-
-  enable_nat_gateway = true
-  single_nat_gateway = true
-
-/*   customer_gateways = {
-    IP1 = {
-      bgp_asn     = 65112
-      ip_address  = "1.2.3.4"
-      device_name = "some_name"
-    },
-    IP2 = {
-      bgp_asn    = 65112
-      ip_address = "5.6.7.8"
-    }
-  }
- */
-  enable_vpn_gateway = false
-
-  #enable_dhcp_options              = false
-  #dhcp_options_domain_name         = "service.consul"
-  #dhcp_options_domain_name_servers = ["127.0.0.1", "10.10.0.2"]
-
-  # Default security group - ingress/egress rules cleared to deny all
-  manage_default_security_group  = true
-  default_security_group_ingress = []
-  default_security_group_egress  = []
-  
-  # VPC Flow Logs (Cloudwatch log group and IAM role will be created)
-  enable_flow_log                      = true
-  create_flow_log_cloudwatch_log_group = true
-  create_flow_log_cloudwatch_iam_role  = true
-  flow_log_max_aggregation_interval    = 60
-  tags = local.tags
 }
 
 ################################################################################
