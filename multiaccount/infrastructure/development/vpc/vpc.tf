@@ -1,10 +1,10 @@
 provider "aws" {
-  region = "eu-west-1"
+  region = "${var.region}"
 }
 
 locals {
   name   = "complete-example"
-  region = "${var.region"
+  region = "${var.region}"
   tags = {
     Owner       = "${var.owner}"
     Environment = "${var.environment}"
@@ -19,7 +19,7 @@ module "vpc" {
   source = "../../"
 
   name = local.name
-  azs                 = ["${local.region-}-${var.environment}az-a", "${local.region}-${var.environment}az-b", "${local.region}-${var.environment}az-c", "${local.region}-${var.environment}az-d"]
+  azs                 = ["${var.region}-${var.environment}az-a", "${var.region}-${var.environment}az-b", "${var.region}-${var.environment}az-c", "${var.region}-${var.environment}az-d"]
   create_database_subnet_group = false
   manage_default_route_table = true
   default_route_table_tags   = { DefaultRouteTable = true }
