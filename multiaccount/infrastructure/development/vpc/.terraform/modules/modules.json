@@ -1,0 +1,1 @@
+{"Modules":[{"Key":"vpc","Source":"../../","Dir":"../.."},{"Key":"vpc_endpoints","Source":"../../modules/vpc-endpoints","Dir":"../../modules/vpc-endpoints"},{"Key":"vpc_endpoints_nocreate","Source":"../../modules/vpc-endpoints","Dir":"../../modules/vpc-endpoints"},{"Key":"","Source":"","Dir":"."}]}
